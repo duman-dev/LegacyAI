@@ -1,6 +1,7 @@
 name: LegacyAI
 options:
-  bundleIdPrefix: com.retro
+  bundleIdPrefix: com.bourbon
+  xcodeVersion: "15.0"
 targets:
   LegacyAI:
     type: application
