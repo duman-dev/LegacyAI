@@ -1,0 +1,13 @@
+name: LegacyAI
+options:
+  bundleIdPrefix: com.retro
+targets:
+  LegacyAI:
+    type: application
+    platform: iOS
+    deploymentTarget: "10.0"
+    sources: [LegacyAI]
+    info:
+      path: LegacyAI/Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
