@@ -10,27 +10,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List files
-        run: ls -la
+      - name: Locate project.yml
+        run: |
+          echo "Dosyalar taranıyor:"
+          find . -name "project.yml"
 
       - name: Install XcodeGen
         run: brew install xcodegen
 
       - name: Generate Xcode Project
-        run: xcodegen generate --spec project.yml
-
-      - name: Verify Project Exists
-        run: ls -la
+        run: |
+          PROJECT_DIR=$(dirname $(find . -name "project.yml" | head -n 1))
+          echo "Proje dizini bulundu: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          xcodegen generate
 
       - name: Build App
         run: |
-          xcodebuild -project LegacyAI.xcodeproj -scheme LegacyAI -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS' build
+          PROJECT_PATH=$(find . -name "*.xcodeproj" | head -n 1)
+          PROJECT_DIR=$(dirname "$PROJECT_PATH")
+          echo "Xcode projesi bulundu: $PROJECT_PATH"
+          cd "$PROJECT_DIR"
+          xcodebuild -project LegacyAI.xcodeproj -scheme LegacyAI -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build
 
       - name: Package IPA
         run: |
           mkdir -p Payload
-          # build klasörünün içindeki app'i bulup Payload'a kopyala
-          find . -name "LegacyAI.app" -type d -exec cp -r {} Payload/ \;
+          APP_PATH=$(find . -name "LegacyAI.app" -type d | grep -v "Index" | head -n 1)
+          echo "App bulundu: $APP_PATH"
+          cp -r "$APP_PATH" Payload/
           zip -r LegacyAI.ipa Payload
 
       - name: Upload Artifact
