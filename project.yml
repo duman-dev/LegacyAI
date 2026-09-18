@@ -6,27 +6,31 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -s /Applications/Xcode_16.app
+      - name: List files
+        run: ls -la
 
       - name: Install XcodeGen
         run: brew install xcodegen
 
       - name: Generate Xcode Project
-        run: xcodegen generate
+        run: xcodegen generate --spec project.yml
+
+      - name: Verify Project Exists
+        run: ls -la
 
       - name: Build App
         run: |
-          xcodebuild -project LegacyAI.xcodeproj -scheme LegacyAI -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project LegacyAI.xcodeproj -scheme LegacyAI -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS' build
 
       - name: Package IPA
         run: |
           mkdir -p Payload
-          cp -r build/Release-iphoneos/LegacyAI.app Payload/
+          # build klasörünün içindeki app'i bulup Payload'a kopyala
+          find . -name "LegacyAI.app" -type d -exec cp -r {} Payload/ \;
           zip -r LegacyAI.ipa Payload
 
       - name: Upload Artifact
